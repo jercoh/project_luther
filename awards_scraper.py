@@ -69,3 +69,10 @@ class AwardScraper(Scraper):
 		self.soup = self.connect(awards_base_url+self.next_record)
 		self.scrape_page()
 
+def main():
+	scraper = AwardScraper()
+	scraper.scrape_all()
+
+if __name__ == '__main__':
+    main()
+
