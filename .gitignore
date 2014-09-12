@@ -1,0 +1,14 @@
+# iPython Notebooks
+*.ipynb
+.ipynb_checkpoints/
+
+# Data
+*.csv
+*.tsv
+*.txt
+data/
+
+# Compilation
+*.pyc
+
+
