@@ -1,6 +1,8 @@
-import os, sys, json
+import os, sys, json, locale
 import requests
 import lxml.html
+
+locale.setlocale(locale.LC_ALL, 'en_US')
 
 def main(id):
     requested_id = id
@@ -58,6 +60,10 @@ def main(id):
         except IndexError:
             movie['stars'] = ""
         try:
+            movie['writers'] = hxs.xpath('//*[@id="overview-top"]/div[5]/a/span/text()')
+        except IndexError:
+            movie['writers'] = ""
+        try:
             movie['poster'] = hxs.xpath('//*[@id="img_primary"]/div/a/img/@src')[0]
         except IndexError:
             movie['poster'] = ""
@@ -73,7 +79,37 @@ def main(id):
             movie['votes'] = hxs.xpath('//*[@id="overview-top"]/div[3]/div[3]/a[1]/span/text()')[0].strip()
         except IndexError:
             movie['votes'] = ""
-        return json.dumps(movie)
+        try:
+            budget = hxs.xpath('//*[@id="titleDetails"]/div[h4/text()="Budget:"]/h4//following::text()')[0].strip()
+            movie['budget'] = locale.atoi(budget.strip('$'))
+        except:
+            movie['budget'] = ""
+        try:
+            gross = hxs.xpath('//*[@id="titleDetails"]/div[h4/text()="Gross:"]/h4//following::text()')[0].strip()
+            movie['domestic_total_gross'] = locale.atoi(gross.strip('$'))
+        except:
+            movie['domestic_total_gross'] = ""
+        try:
+            opening_weekend = hxs.xpath('//*[@id="titleDetails"]/div[h4/text()="Opening Weekend:"]/h4//following::text()')[0]
+            opening_weekend = opening_weekend.split()[0]
+            movie['opening_weekend'] = locale.atoi(opening_weekend.strip('$'))
+        except:
+            movie['opening_weekend'] = ""
+        try:
+            movie['production_companies'] = hxs.xpath('//*[@id="titleDetails"]/div[h4/text()="Production Co:"]/span/a/span/text()')
+        except:
+            movie['production_companies'] = ""
+        try:
+            movie['awards'] = {}
+            hxs_awards = lxml.html.document_fromstring(requests.get("http://www.imdb.com/title/" + requested_id+"/awards?ref_=tt_awd").content)
+            award_list = hxs_awards.xpath('//*[@class="article listo"]/div[@class="header"]//div[@class="nav"]/div/text()')[0].split()
+            movie['awards']['wins'] = award_list[2]
+            movie['awards']['nominations'] = award_list[5]
+        except:
+            movie['awards'] = {}
+            movie['awards']['wins'] = ""
+            movie['awards']['nominations'] = ""
+        print json.dumps(movie)
     else:
         print "invalid id"
 
