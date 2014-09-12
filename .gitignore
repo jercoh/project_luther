@@ -11,4 +11,6 @@ data/
 # Compilation
 *.pyc
 
+app_config.py
+
 
